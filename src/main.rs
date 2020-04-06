@@ -8,7 +8,7 @@ use rayon::prelude::*;
 use std::io;
 // use std::String;
 use bio::io::fasta;
-use bio::alignment::pairwise::*;
+use bio::alignment::pairwise::banded::*;
 use bio::scores::blosum62;
 
 fn main() {
@@ -36,9 +36,11 @@ pub fn nwm(a: &str, b: &str) -> f64 {
 	let x = a.as_bytes();
 	let y = b.as_bytes();
 	let score = &blosum62;
-	let mut aligner_x = Aligner::with_capacity(x.len(), x.len(), gapo, gape, &score);
-	let mut aligner_y = Aligner::with_capacity(y.len(), y.len(), gapo, gape, &score);
-	let mut aligner = Aligner::with_capacity(x.len(), y.len(), gapo, gape, &score);
+	let k=4;
+	let w=12;
+	let mut aligner_x = Aligner::with_capacity(x.len(), x.len(), gapo, gape, &score,k,w);
+	let mut aligner_y = Aligner::with_capacity(y.len(), y.len(), gapo, gape, &score,k,w);
+	let mut aligner = Aligner::with_capacity(x.len(), y.len(), gapo, gape, &score,k,w);
 	let x_y = aligner.global(x, y).score;
 	let x_x = aligner_x.global(x, x).score;
 	let y_y = aligner_y.global(y, y).score;
