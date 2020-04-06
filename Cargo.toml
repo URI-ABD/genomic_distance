@@ -13,3 +13,8 @@ float-cmp = "^0.6.0"
 time = "^0.2.7"
 lazy_static = "^1.4.0"
 bio = "*"
+
+[[bin]]
+bench = false
+path = "src/main.rs"
+name = "genomic-distance"

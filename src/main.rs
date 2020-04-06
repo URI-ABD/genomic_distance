@@ -8,6 +8,8 @@ use rayon::prelude::*;
 use std::io;
 // use std::String;
 use bio::io::fasta;
+use bio::alignment::pairwise::*;
+use bio::scores::blosum62;
 
 fn main() {
     let reader = fasta::Reader::new(io::stdin());
@@ -19,9 +21,29 @@ fn main() {
     	// let row = reader.records().iter().map(|r1, r2| levenshtein(r1.seq(), r2.seq()));
     }
     for s1 in &seqs {
-    	let row: Vec<usize>  = seqs.par_iter().map(|s2| levenshtein(&s1, &s2)).collect();
+    	let row: Vec<f64>  = seqs.par_iter().map(|s2| nwm(&s1, &s2)).collect();
     	print!("{:?}\n", row);
     }
+}
+
+pub fn nwm(a: &str, b: &str) -> f64 {
+	/*
+	Needleman-Wunsch metric, as described by Fisher
+
+	*/
+	let gapo = -5;
+	let gape = -1;
+	let x = a.as_bytes();
+	let y = b.as_bytes();
+	let score = &blosum62;
+	let mut aligner_x = Aligner::with_capacity(x.len(), x.len(), gapo, gape, &score);
+	let mut aligner_y = Aligner::with_capacity(y.len(), y.len(), gapo, gape, &score);
+	let mut aligner = Aligner::with_capacity(x.len(), y.len(), gapo, gape, &score);
+	let x_y = aligner.global(x, y).score;
+	let x_x = aligner_x.global(x, x).score;
+	let y_y = aligner_y.global(y, y).score;
+	((x_x + y_y - 2*x_y) as f64).sqrt()
+
 }
 
 pub fn levenshtein(a: &str, b: &str) -> usize {
